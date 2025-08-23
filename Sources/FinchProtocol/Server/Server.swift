@@ -16,17 +16,20 @@ public actor Server {
     
     private let host: String
     private let port: Int
+
     
-    private let onMessage: @Sendable (RequestMessage) -> Data?
+    
+    // MARK: - Properties
+    
+    var onMessage: @Sendable (RequestMessage) -> Data?
     
     
     
     // MARK: - Construction
     
-    public init(host: String, port: Int, onMessage: @escaping @Sendable (RequestMessage) -> Data?) {
+    public init(host: String = "127.0.0.1", port: Int = 8888) {
         self.host = host
         self.port = port
-        self.onMessage = onMessage
     }
     
     
