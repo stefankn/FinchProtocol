@@ -59,8 +59,11 @@ public actor Server {
                                     case .nowPlaying:
                                         messageData = try await onMessage(.nowPlayingInfo)
                                     case .playPlaylist:
-                                        if let playlistId = inboundData.getInteger(at: 1, endianness: .little, as: Int.self) {
-                                            messageData = try await onMessage(.playPlaylist(playlistId: playlistId))
+                                        if
+                                            let playlistId = inboundData.getInteger(at: 1, endianness: .little, as: Int.self),
+                                            let shuffle = inboundData.getBytes(at: MemoryLayout<Int>.size + 1, length: 1)?.first {
+                                            
+                                            messageData = try await onMessage(.playPlaylist(playlistId: playlistId, shuffle: shuffle == 1))
                                         } else {
                                             type = .error
                                             messageData = "Invalid parameter for 'playlistId'".data(using: .utf8)

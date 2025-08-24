@@ -48,8 +48,9 @@ public actor Client {
             switch message {
             case .nowPlayingInfo:
                 break
-            case .playPlaylist(let playlistId):
+            case .playPlaylist(let playlistId, let shuffle):
                 data.append(withUnsafeBytes(of: playlistId.littleEndian) { Data($0)})
+                data.append(contentsOf: [shuffle ? 1 : 0])
             }
             
             let buffer = ByteBuffer(bytes: data)

@@ -9,7 +9,7 @@ import Foundation
 
 public enum RequestMessage: Sendable {
     case nowPlayingInfo
-    case playPlaylist(playlistId: Int)
+    case playPlaylist(playlistId: Int, shuffle: Bool)
     
     
     
