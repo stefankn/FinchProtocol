@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum ResponseMessage {
+public enum ResponseMessage: Sendable {
     case nowPlayingInfo(NowPlayingInfo)
     case playPlaylist
 }

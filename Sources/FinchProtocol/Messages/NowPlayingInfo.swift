@@ -7,18 +7,18 @@
 
 import Foundation
 
-public struct NowPlayingInfo: Codable {
+public struct NowPlayingInfo: Codable, Sendable {
     
     // MARK: - Properties
     
-    public let artist: String
-    public let title: String
+    public let artist: String?
+    public let title: String?
     
     
     
     // MARK: - Construction
     
-    public init(artist: String, title: String) {
+    public init(artist: String?, title: String?) {
         self.artist = artist
         self.title = title
     }

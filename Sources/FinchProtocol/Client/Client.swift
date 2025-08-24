@@ -14,40 +14,80 @@ public actor Client {
 
     private let host: String
     private let port: Int
-    private let onResponse: @Sendable (ResponseMessage) -> Void
-    private let onError: @Sendable (ClientError) -> Void
     
     
     
     // MARK: - Construction
     
-    public init(host: String, port: Int, onResponse: @escaping @Sendable (ResponseMessage) -> Void, onError: @escaping @Sendable (ClientError) -> Void) {
+    public init(host: String, port: Int) {
         self.host = host
         self.port = port
-        self.onResponse = onResponse
-        self.onError = onError
     }
     
     
     
     // MARK: - Functions
     
-    public func send(_ message: RequestMessage) throws {
+    public func send(_ message: RequestMessage) async throws -> ResponseMessage {
         let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        
         let bootstrap = ClientBootstrap(group: group)
             .channelOption(.socketOption(.so_reuseaddr), value: 1)
-            .channelInitializer { channel in
-                channel.eventLoop.makeCompletedFuture {
-                    try channel.pipeline.syncOperations.addHandlers(ClientChannelHandler(message: message, onResponse: self.onResponse, onError: self.onError))
-                }
+        
+        let channel = try await bootstrap.connect(host: host, port: port) { channel in
+            channel.eventLoop.makeCompletedFuture {
+                try NIOAsyncChannel<ByteBuffer, ByteBuffer>(wrappingChannelSynchronously: channel)
             }
-        defer {
-            try? group.syncShutdownGracefully()
         }
         
-        let channel = try bootstrap.connect(host: host, port: port).wait()
-        try channel.closeFuture.wait()
+        var response: ResponseMessage?
         
-        print("CLIENT: closed")
+        try await channel.executeThenClose { inbound, outbound in
+            var data = Data([message.messageType.rawValue])
+            
+            switch message {
+            case .nowPlayingInfo:
+                break
+            case .playPlaylist(let playlistId):
+                data.append(withUnsafeBytes(of: playlistId.littleEndian) { Data($0)})
+            }
+            
+            let buffer = ByteBuffer(bytes: data)
+            
+            try await outbound.write(buffer)
+            
+            for try await inboundData in inbound {
+                guard let typeValue = inboundData.getBytes(at: 0, length: 1)?.first else { throw ClientError.missingResponseMessageType }
+                guard let type = MessageType(rawValue: typeValue) else { throw ClientError.unknownResponseMessageType(typeValue) }
+                
+                if inboundData.readableBytes > 1 {
+                    do {
+                        switch type {
+                        case .nowPlaying:
+                            let bytes = inboundData.getBytes(at: 1, length: inboundData.readableBytes - 1) ?? []
+                            let info = try JSONDecoder().decode(NowPlayingInfo.self, from: Data(bytes))
+                            response = .nowPlayingInfo(info)
+                            return
+                        case .playPlaylist:
+                            response = .playPlaylist
+                            return
+                        case .error:
+                            let errorMessage = inboundData.getString(at: 1, length: inboundData.readableBytes - 1) ?? ""
+                            throw ClientError.responseError(errorMessage)
+                        }
+                    } catch {
+                        throw ClientError.responseDecodingFailure(error)
+                    }
+                } else {
+                    return
+                }
+            }
+        }
+        
+        if let response {
+            return response
+        }
+        
+        throw ClientError.responseError("Invalid response")
     }
 }
