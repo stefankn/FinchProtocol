@@ -60,26 +60,21 @@ public actor Client {
                 guard let typeValue = inboundData.getBytes(at: 0, length: 1)?.first else { throw ClientError.missingResponseMessageType }
                 guard let type = MessageType(rawValue: typeValue) else { throw ClientError.unknownResponseMessageType(typeValue) }
                 
-                if inboundData.readableBytes > 1 {
-                    do {
-                        switch type {
-                        case .nowPlaying:
-                            let bytes = inboundData.getBytes(at: 1, length: inboundData.readableBytes - 1) ?? []
-                            let info = try JSONDecoder().decode(NowPlayingInfo.self, from: Data(bytes))
-                            response = .nowPlayingInfo(info)
-                            return
-                        case .playPlaylist:
-                            response = .playPlaylist
-                            return
-                        case .error:
-                            let errorMessage = inboundData.getString(at: 1, length: inboundData.readableBytes - 1) ?? ""
-                            throw ClientError.responseError(errorMessage)
-                        }
-                    } catch {
-                        throw ClientError.responseDecodingFailure(error)
-                    }
-                } else {
+                switch type {
+                case .nowPlaying:
+                    guard inboundData.readableBytes > 1 else { throw ClientError.responseError("Invalid response") }
+                    let bytes = inboundData.getBytes(at: 1, length: inboundData.readableBytes - 1) ?? []
+                    let info = try JSONDecoder().decode(NowPlayingInfo.self, from: Data(bytes))
+                    response = .nowPlayingInfo(info)
                     return
+                case .playPlaylist:
+                    response = .playPlaylist
+                    return
+                case .error:
+                    guard inboundData.readableBytes > 1 else { throw ClientError.responseError("Response failure") }
+                    
+                    let errorMessage = inboundData.getString(at: 1, length: inboundData.readableBytes - 1) ?? ""
+                    throw ClientError.responseError(errorMessage)
                 }
             }
         }

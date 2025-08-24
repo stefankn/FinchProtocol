@@ -10,7 +10,6 @@ import Foundation
 public enum ClientError: Error {
     case missingResponseMessageType
     case unknownResponseMessageType(UInt8)
-    case responseDecodingFailure(Error)
     case connectionFailure(Error)
     case responseError(String)
 }
