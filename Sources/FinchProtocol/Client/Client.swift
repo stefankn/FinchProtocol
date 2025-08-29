@@ -51,6 +51,9 @@ public actor Client {
             case .playPlaylist(let playlistId, let shuffle):
                 data.append(withUnsafeBytes(of: playlistId.littleEndian) { Data($0)})
                 data.append(contentsOf: [shuffle ? 1 : 0])
+            case .playAlbum(albumId: let albumId, shuffle: let shuffle):
+                data.append(withUnsafeBytes(of: albumId.littleEndian) { Data($0)})
+                data.append(contentsOf: [shuffle ? 1 : 0])
             }
             
             let buffer = ByteBuffer(bytes: data)
@@ -76,6 +79,9 @@ public actor Client {
                     
                     let errorMessage = inboundData.getString(at: 1, length: inboundData.readableBytes - 1) ?? ""
                     throw ClientError.responseError(errorMessage)
+                case .playAlbum:
+                    response = .playAlbum
+                    return
                 }
             }
         }

@@ -70,6 +70,16 @@ public actor Server {
                                         }
                                     case .error:
                                         type = .error
+                                    case .playAlbum:
+                                        if
+                                            let albumId = inboundData.getInteger(at: 1, endianness: .little, as: Int.self),
+                                            let shuffle = inboundData.getBytes(at: MemoryLayout<Int>.size + 1, length: 1)?.first {
+                                            
+                                            messageData = try await onMessage(.playAlbum(albumId: albumId, shuffle: shuffle == 1))
+                                        } else {
+                                            type = .error
+                                            messageData = "Invalid parameter for 'albumId'".data(using: .utf8)
+                                        }
                                     }
                                     
                                     var data = Data([type.rawValue])

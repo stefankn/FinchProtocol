@@ -10,6 +10,7 @@ import Foundation
 enum MessageType: UInt8 {
     case nowPlaying
     case playPlaylist
+    case playAlbum
     
     case error = 255
 }

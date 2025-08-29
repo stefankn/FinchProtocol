@@ -10,4 +10,5 @@ import Foundation
 public enum ResponseMessage: Sendable {
     case nowPlayingInfo(NowPlayingInfo)
     case playPlaylist
+    case playAlbum
 }

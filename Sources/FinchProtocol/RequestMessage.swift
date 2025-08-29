@@ -10,6 +10,7 @@ import Foundation
 public enum RequestMessage: Sendable {
     case nowPlayingInfo
     case playPlaylist(playlistId: Int, shuffle: Bool)
+    case playAlbum(albumId: Int, shuffle: Bool)
     
     
     
@@ -21,6 +22,8 @@ public enum RequestMessage: Sendable {
             return .nowPlaying
         case .playPlaylist:
             return .playPlaylist
+        case .playAlbum:
+            return .playAlbum
         }
     }
 }
