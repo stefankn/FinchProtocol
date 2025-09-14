@@ -66,10 +66,7 @@ public actor Client {
                 
                 switch type {
                 case .nowPlaying:
-                    guard inboundData.readableBytes > 1 else { throw ClientError.responseError("Invalid response") }
-                    let bytes = inboundData.getBytes(at: 1, length: inboundData.readableBytes - 1) ?? []
-                    let info = try JSONDecoder().decode(NowPlayingInfo.self, from: Data(bytes))
-                    response = .nowPlayingInfo(info)
+                    response = .nowPlayingInfo(try read(inboundData))
                     return
                 case .playPlaylist:
                     response = .playPlaylist
@@ -83,16 +80,13 @@ public actor Client {
                     response = .playAlbum
                     return
                 case .playPreviousTrack:
-                    response = .playPreviousTrack
+                    response = .playPreviousTrack(try read(inboundData))
                     return
                 case .playNextTrack:
-                    guard inboundData.readableBytes > 1 else { throw ClientError.responseError("Invalid response") }
-                    let bytes = inboundData.getBytes(at: 1, length: inboundData.readableBytes - 1) ?? []
-                    let result = try JSONDecoder().decode(PlayResult.self, from: Data(bytes))
-                    response = .playNextTrack(result)
+                    response = .playNextTrack(try read(inboundData))
                     return
                 case .play:
-                    response = .play
+                    response = .play(try read(inboundData))
                     return
                 case .pause:
                     response = .pause
@@ -106,5 +100,11 @@ public actor Client {
         }
         
         throw ClientError.responseError("Invalid response")
+    }
+    
+    private func read<T: Decodable>(_ data: ByteBuffer) throws -> T {
+        guard data.readableBytes > 1 else { throw ClientError.responseError("Invalid response") }
+        let bytes = data.getBytes(at: 1, length: data.readableBytes - 1) ?? []
+        return try JSONDecoder().decode(T.self, from: Data(bytes))
     }
 }
