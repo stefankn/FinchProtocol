@@ -11,6 +11,8 @@ public enum RequestMessage: Sendable {
     case nowPlayingInfo
     case playPlaylist(playlistId: Int, shuffle: Bool)
     case playAlbum(albumId: Int, shuffle: Bool)
+    case playPreviousTrack
+    case playNextTrack
     
     
     
@@ -24,6 +26,10 @@ public enum RequestMessage: Sendable {
             return .playPlaylist
         case .playAlbum:
             return .playAlbum
+        case .playPreviousTrack:
+            return .playPreviousTrack
+        case .playNextTrack:
+            return .playNextTrack
         }
     }
 }

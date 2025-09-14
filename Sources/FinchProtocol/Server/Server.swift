@@ -20,7 +20,7 @@ public actor Server {
     
     // MARK: - Construction
     
-    public init(host: String = "127.0.0.1", port: Int = 8888) {
+    public init(host: String = "0.0.0.0", port: Int = 8888) {
         self.host = host
         self.port = port
     }
@@ -68,8 +68,7 @@ public actor Server {
                                             type = .error
                                             messageData = "Invalid parameter for 'playlistId'".data(using: .utf8)
                                         }
-                                    case .error:
-                                        type = .error
+                                        break
                                     case .playAlbum:
                                         if
                                             let albumId = inboundData.getInteger(at: 1, endianness: .little, as: Int.self),
@@ -80,6 +79,8 @@ public actor Server {
                                             type = .error
                                             messageData = "Invalid parameter for 'albumId'".data(using: .utf8)
                                         }
+                                    case .error, .playPreviousTrack, .playNextTrack:
+                                        break
                                     }
                                     
                                     var data = Data([type.rawValue])

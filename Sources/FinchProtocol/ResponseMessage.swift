@@ -11,4 +11,6 @@ public enum ResponseMessage: Sendable {
     case nowPlayingInfo(NowPlayingInfo)
     case playPlaylist
     case playAlbum
+    case playPreviousTrack
+    case playNextTrack
 }
