@@ -86,7 +86,10 @@ public actor Client {
                     response = .playPreviousTrack
                     return
                 case .playNextTrack:
-                    response = .playNextTrack
+                    guard inboundData.readableBytes > 1 else { throw ClientError.responseError("Invalid response") }
+                    let bytes = inboundData.getBytes(at: 1, length: inboundData.readableBytes - 1) ?? []
+                    let result = try JSONDecoder().decode(PlayResult.self, from: Data(bytes))
+                    response = .playNextTrack(result)
                     return
                 case .play:
                     response = .play

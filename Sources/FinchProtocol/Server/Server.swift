@@ -79,7 +79,15 @@ public actor Server {
                                             type = .error
                                             messageData = "Invalid parameter for 'albumId'".data(using: .utf8)
                                         }
-                                    case .error, .playPreviousTrack, .playNextTrack, .play, .pause:
+                                    case .playPreviousTrack:
+                                        messageData = try await onMessage(.playPreviousTrack)
+                                    case .playNextTrack:
+                                        messageData = try await onMessage(.playNextTrack)
+                                    case .play:
+                                        messageData = try await onMessage(.play)
+                                    case .pause:
+                                        messageData = try await onMessage(.pause)
+                                    case .error:
                                         break
                                     }
                                     
