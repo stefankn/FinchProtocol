@@ -13,6 +13,8 @@ public enum RequestMessage: Sendable {
     case playAlbum(albumId: Int, shuffle: Bool)
     case playPreviousTrack
     case playNextTrack
+    case play
+    case pause
     
     
     
@@ -30,6 +32,10 @@ public enum RequestMessage: Sendable {
             return .playPreviousTrack
         case .playNextTrack:
             return .playNextTrack
+        case .play:
+            return .play
+        case .pause:
+            return .pause
         }
     }
 }

@@ -13,4 +13,6 @@ public enum ResponseMessage: Sendable {
     case playAlbum
     case playPreviousTrack
     case playNextTrack
+    case play
+    case pause
 }

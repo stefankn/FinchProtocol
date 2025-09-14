@@ -13,6 +13,8 @@ enum MessageType: UInt8 {
     case playAlbum
     case playPreviousTrack
     case playNextTrack
+    case play
+    case pause
     
     case error = 255
 }

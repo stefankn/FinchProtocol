@@ -46,7 +46,7 @@ public actor Client {
             var data = Data([message.messageType.rawValue])
             
             switch message {
-            case .nowPlayingInfo, .playPreviousTrack, .playNextTrack:
+            case .nowPlayingInfo, .playPreviousTrack, .playNextTrack, .play, .pause:
                 break
             case .playPlaylist(let playlistId, let shuffle):
                 data.append(withUnsafeBytes(of: playlistId.littleEndian) { Data($0)})
@@ -87,6 +87,12 @@ public actor Client {
                     return
                 case .playNextTrack:
                     response = .playNextTrack
+                    return
+                case .play:
+                    response = .play
+                    return
+                case .pause:
+                    response = .pause
                     return
                 }
             }

@@ -79,7 +79,7 @@ public actor Server {
                                             type = .error
                                             messageData = "Invalid parameter for 'albumId'".data(using: .utf8)
                                         }
-                                    case .error, .playPreviousTrack, .playNextTrack:
+                                    case .error, .playPreviousTrack, .playNextTrack, .play, .pause:
                                         break
                                     }
                                     
